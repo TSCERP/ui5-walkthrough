@@ -1,0 +1,58 @@
+ID: walkthrough
+_schema-version: 3.2.0
+version: 0.0.1
+parameters:
+  enable-parallel-deployments: true
+modules:
+  - name: approuter
+    type: approuter.nodejs
+    path: approuter
+    requires:
+      - name: walkthrough-destination # found in resources section of this file
+    parameters:
+      disk-quota: 256M
+      memory: 256M
+      host: walkthrough
+  - name: deployer
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: walkthrough-repo-host # found in resources section of this file
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - artifacts:
+            - walkthrough.zip
+          name: walkthrough
+          target-path: resources/
+  - name: walkthrough
+    type: html5
+    path: .
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+      - npm install
+      - npm run build:ui
+      supported-platforms: []
+resources:
+  - name: walkthrough_app_runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime
+  - name: walkthrough-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+  - name: walkthrough-app-uaa
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: walkthrough
+  - name: walkthrough-destination
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: walkthrough

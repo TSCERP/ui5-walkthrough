@@ -1,0 +1,33 @@
+ID: walkthrough-approuter
+_schema-version: 3.2.0
+version: 0.0.1
+parameters:
+  enable-parallel-deployments: true
+modules:
+  - name: approuter
+    type: approuter.nodejs
+    path: ./approuter
+    requires:
+      - name: html5-destination # found in resources section of this file
+    parameters:
+      disk-quota: 256M
+      memory: 256M
+  - name: walkthrough
+    type: html5
+    path: ./
+    build-parameters:
+      builder: custom
+      commands:
+      - npm install
+      - npm run build:ui
+      supported-platforms: []
+      build-result: dist
+resources:
+  - name: html5-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service-plan: lite
+      service: destination
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
